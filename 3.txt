@@ -1,0 +1,117 @@
+create database pr3;
+
+use pr3;
+CREATE TABLE Branch (
+    branch_name VARCHAR(50) PRIMARY KEY,
+    branch_city VARCHAR(50) NOT NULL,
+    assets DECIMAL(12,2) NOT NULL
+);
+
+CREATE TABLE Account (
+    acc_no INT PRIMARY KEY,
+    branch_name VARCHAR(50),
+    balance DECIMAL(12,2) NOT NULL,
+
+    FOREIGN KEY (branch_name)
+    REFERENCES Branch(branch_name)
+);
+
+CREATE TABLE Customer (
+    cust_name VARCHAR(50) PRIMARY KEY,
+    cust_street VARCHAR(50) NOT NULL,
+    cust_city VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Depositor (
+    cust_name VARCHAR(50),
+    acc_no INT,
+
+    PRIMARY KEY (cust_name, acc_no),
+
+    FOREIGN KEY (cust_name)
+    REFERENCES Customer(cust_name),
+
+    FOREIGN KEY (acc_no)
+    REFERENCES Account(acc_no)
+);
+
+CREATE TABLE Loan (
+    loan_no INT PRIMARY KEY,
+    branch_name VARCHAR(50),
+    amount DECIMAL(12,2) NOT NULL,
+
+    FOREIGN KEY (branch_name)
+    REFERENCES Branch(branch_name)
+);
+
+CREATE TABLE Borrower (
+    cust_name VARCHAR(50),
+    loan_no INT,
+
+    PRIMARY KEY (cust_name, loan_no),
+
+    FOREIGN KEY (cust_name)
+    REFERENCES Customer(cust_name),
+
+    FOREIGN KEY (loan_no)
+    REFERENCES Loan(loan_no)
+);
+
+INSERT INTO Branch VALUES
+('Wadia College', 'Pune', 500000),
+('FC Road', 'Pune', 300000),
+('Shivaji Nagar', 'Mumbai', 700000);
+
+INSERT INTO Account VALUES
+(101, 'Wadia College', 25000),
+(102, 'FC Road', 12000),
+(103, 'Wadia College', 18000),
+(104, 'Shivaji Nagar', 10000);
+
+INSERT INTO Customer VALUES
+('Pratik', 'JM Road', 'Pune'),
+('Pooja', 'Karve Road', 'Mumbai'),
+('Rahul', 'MG Road', 'Delhi');
+
+INSERT INTO Depositor VALUES
+('Pratik', 101),
+('Pooja', 102),
+('Rahul', 103);
+
+INSERT INTO Loan VALUES
+(201, 'Wadia College', 1400),
+(202, 'FC Road', 5000),
+(203, 'Shivaji Nagar', 15000);
+
+INSERT INTO Borrower VALUES
+('Pratik', 201),
+('Pooja', 202);
+
+SELECT branch_name, AVG(balance) AS Average_Balance
+FROM Account
+GROUP BY branch_name
+HAVING AVG(balance) > 15000;
+
+SELECT COUNT(*) AS Total_Customers
+FROM Customer;
+
+SELECT SUM(amount) AS Total_Loan_Amount
+FROM Loan;
+
+DELETE FROM Borrower
+WHERE loan_no IN (
+    SELECT loan_no
+    FROM Loan
+    WHERE amount BETWEEN 1300 AND 1500
+);
+
+DELETE FROM Loan
+WHERE amount BETWEEN 1300 AND 1500;
+
+SELECT branch_name, AVG(balance) AS Average_Balance
+FROM Account
+GROUP BY branch_name;
+
+SELECT cust_name, cust_city
+FROM Customer
+WHERE cust_name LIKE 'P%';

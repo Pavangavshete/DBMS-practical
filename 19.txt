@@ -1,0 +1,56 @@
+create database pr24;
+use pr24;
+DROP TABLE IF EXISTS Tracking;
+DROP TABLE IF EXISTS Emp;
+
+CREATE TABLE Emp (
+    Emp_no INT PRIMARY KEY,
+    Emp_name VARCHAR(50),
+    Emp_salary DECIMAL(10,2)
+);
+
+CREATE TABLE Tracking (
+    Emp_no INT,
+    Emp_salary DECIMAL(10,2)
+);
+
+DELIMITER $$
+
+CREATE TRIGGER emp_insert_trigger
+AFTER INSERT ON Emp
+FOR EACH ROW
+BEGIN
+    IF NEW.Emp_salary < 50000 THEN
+        INSERT INTO Tracking VALUES (NEW.Emp_no, NEW.Emp_salary);
+    END IF;
+END$$
+
+DELIMITER $$
+CREATE TRIGGER emp_update_trigger
+AFTER UPDATE ON Emp
+FOR EACH ROW
+BEGIN
+    IF NEW.Emp_salary < 50000 THEN
+        INSERT INTO Tracking VALUES (NEW.Emp_no, NEW.Emp_salary);
+    END IF;
+END$$
+
+DELIMITER $$
+CREATE TRIGGER emp_delete_trigger
+AFTER DELETE ON Emp
+FOR EACH ROW
+BEGIN
+    INSERT INTO Tracking VALUES (OLD.Emp_no, OLD.Emp_salary);
+END$$
+
+DELIMITER ;
+
+INSERT INTO Emp VALUES (1, 'Amit', 45000);
+INSERT INTO Emp VALUES (2, 'Rahul', 60000);
+
+UPDATE Emp SET Emp_salary = 48000 WHERE Emp_no = 2;
+
+DELETE FROM Emp WHERE Emp_no = 1;
+
+SELECT * FROM Emp;
+SELECT * FROM Tracking;

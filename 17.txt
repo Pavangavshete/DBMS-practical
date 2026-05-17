@@ -1,0 +1,74 @@
+CREATE DATABASE pr22;
+
+USE pr22;
+
+CREATE TABLE Library(
+    Book_id INT PRIMARY KEY,
+    Book_name VARCHAR(50),
+    Author VARCHAR(50),
+    Price INT
+);
+
+CREATE TABLE Library_Audit(
+    Book_id INT,
+    Book_name VARCHAR(50),
+    Author VARCHAR(50),
+    Price INT,
+    Action_Type VARCHAR(20),
+    Action_Date DATETIME
+);
+
+INSERT INTO Library VALUES
+(1,'DBMS','Korth',500),
+(2,'CN','Tanenbaum',600);
+
+DELIMITER //
+
+CREATE TRIGGER before_library_update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+
+    INSERT INTO Library_Audit
+    VALUES(
+        OLD.Book_id,
+        OLD.Book_name,
+        OLD.Author,
+        OLD.Price,
+        'BEFORE UPDATE',
+        NOW()
+    );
+
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER after_library_delete
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+
+    INSERT INTO Library_Audit
+    VALUES(
+        OLD.Book_id,
+        OLD.Book_name,
+        OLD.Author,
+        OLD.Price,
+        'AFTER DELETE',
+        NOW()
+    );
+
+END //
+
+DELIMITER ;
+
+UPDATE Library
+SET Price = 700
+WHERE Book_id = 1;
+
+DELETE FROM Library
+WHERE Book_id = 2;
+
+SELECT * FROM Library_Audit;

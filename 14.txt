@@ -1,0 +1,59 @@
+create database pr18;
+use pr18;
+CREATE TABLE Student(
+    Roll INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Attendance INT,
+    Status VARCHAR(20)
+);
+
+INSERT INTO Student VALUES(1,'Rahul',80,NULL);
+INSERT INTO Student VALUES(2,'Sneha',60,NULL);
+INSERT INTO Student VALUES(3,'Amit',75,NULL);
+
+
+DELIMITER //
+
+CREATE PROCEDURE CheckAttendance(IN rno INT)
+
+BEGIN
+
+    DECLARE att INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SELECT 'Error Occurred' AS Message;
+    END;
+
+    SELECT Attendance
+    INTO att
+    FROM Student
+    WHERE Roll = rno;
+
+    IF att < 75 THEN
+
+        UPDATE Student
+        SET Status = 'Detained'
+        WHERE Roll = rno;
+
+        SELECT 'Term not granted' AS Message;
+
+    ELSE
+
+        UPDATE Student
+        SET Status = 'Not Detained'
+        WHERE Roll = rno;
+
+        SELECT 'Term granted' AS Message;
+
+    END IF;
+
+END //
+
+DELIMITER ;
+
+
+
+CALL CheckAttendance(2);
+
+SELECT * FROM Student;

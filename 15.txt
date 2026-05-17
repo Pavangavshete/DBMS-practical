@@ -1,0 +1,46 @@
+create database pr15;
+use pr15;
+CREATE TABLE emp(
+    emp_no INT PRIMARY KEY,
+    salary DECIMAL(10,2)
+);
+
+CREATE TABLE increment_salary(
+    emp_no INT,
+    salary DECIMAL(10,2)
+);
+
+INSERT INTO emp VALUES
+(1,20000),
+(2,30000),
+(3,40000),
+(4,25000);
+
+DELIMITER //
+
+CREATE PROCEDURE increase_salary()
+
+BEGIN
+
+    DECLARE avg_sal DECIMAL(10,2);
+
+    SET avg_sal = (SELECT AVG(salary) FROM emp);
+
+    UPDATE emp
+    SET salary = salary + (salary * 0.10)
+    WHERE salary < avg_sal;
+
+    INSERT INTO increment_salary(emp_no, salary)
+    SELECT emp_no, salary
+    FROM emp
+    WHERE salary < avg_sal * 1.10;
+
+END //
+
+DELIMITER ;
+
+CALL increase_salary();
+
+SELECT * FROM emp;
+
+SELECT * FROM increment_salary;

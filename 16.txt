@@ -1,0 +1,35 @@
+use pr21;
+DELIMITER //
+
+CREATE PROCEDURE Age_calc(
+    IN dob DATE,
+    OUT years INT,
+    OUT months INT,
+    OUT days INT
+)
+
+BEGIN
+
+    SET years = TIMESTAMPDIFF(YEAR, dob, CURDATE());
+
+    SET months = TIMESTAMPDIFF(MONTH, dob, CURDATE()) % 12;
+
+    SET days = DATEDIFF(
+                    CURDATE(),
+                    DATE_ADD(
+                        DATE_ADD(dob, INTERVAL years YEAR),
+                        INTERVAL months MONTH
+                    )
+               );
+
+END //
+
+DELIMITER ;
+
+SET @y = 0;
+SET @m = 0;
+SET @d = 0;
+
+CALL Age_calc('2003-02-10', @y, @m, @d);
+
+SELECT @y AS Years, @m AS Months, @d AS Days;

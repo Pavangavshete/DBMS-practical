@@ -1,0 +1,76 @@
+CREATE DATABASE pr16;
+
+USE pr16;
+
+
+
+CREATE TABLE Borrower(
+    Rollin INT,
+    Name VARCHAR(50),
+    DateofIssue DATE,
+    NameofBook VARCHAR(50),
+    Status CHAR(1)
+);
+
+CREATE TABLE Fine(
+    Roll_no INT,
+    Date1 DATE,
+    Amt INT
+);
+
+INSERT INTO Borrower
+VALUES
+(1,'Rahul','2026-04-10','DBMS','I'),
+(2,'Sneha','2026-03-20','CN','I');
+
+DELIMITER //
+
+CREATE PROCEDURE libraryfine(
+    IN rno INT,
+    IN bname VARCHAR(50)
+)
+BEGIN
+
+    DECLARE d1 DATE;
+    DECLARE nodays INT;
+    DECLARE fineamt INT DEFAULT 0;
+
+    SELECT DateofIssue
+    INTO d1
+    FROM Borrower
+    WHERE Rollin = rno
+    AND NameofBook = bname;
+
+    SET nodays = DATEDIFF(CURDATE(), d1);
+
+    IF nodays BETWEEN 15 AND 30 THEN
+        SET fineamt = nodays * 5;
+
+    ELSEIF nodays > 30 THEN
+        SET fineamt = (30 * 5) + ((nodays - 30) * 50);
+
+    END IF;
+
+    IF fineamt > 0 THEN
+        INSERT INTO Fine
+        VALUES(rno, CURDATE(), fineamt);
+    END IF;
+
+    UPDATE Borrower
+    SET Status = 'R'
+    WHERE Rollin = rno
+    AND NameofBook = bname;
+
+END //
+
+DELIMITER ;
+
+SET SQL_SAFE_UPDATES = 0;
+
+
+CALL libraryfine(1,'DBMS');
+SET SQL_SAFE_UPDATES = 1;
+
+SELECT * FROM Fine;
+
+SELECT * FROM Borrower;

@@ -1,0 +1,84 @@
+DROP DATABASE IF EXISTS pr9;
+CREATE DATABASE pr9;
+USE pr9;
+
+CREATE TABLE CUSTOMERS (
+    CNo INT PRIMARY KEY,
+    Cname VARCHAR(50) NOT NULL,
+    Ccity VARCHAR(50) NOT NULL,
+    CMobile VARCHAR(15) UNIQUE
+);
+
+CREATE TABLE ITEMS (
+    INo INT PRIMARY KEY,
+    Iname VARCHAR(50) NOT NULL,
+    Itype VARCHAR(50) NOT NULL,
+    Iprice DECIMAL(10,2) NOT NULL,
+    Icount INT NOT NULL
+);
+
+CREATE TABLE PURCHASE (
+    PNo INT PRIMARY KEY,
+    Pdate DATE NOT NULL,
+    Pquantity INT NOT NULL,
+    CNo INT,
+    INo INT,
+    FOREIGN KEY (CNo) REFERENCES CUSTOMERS(CNo),
+    FOREIGN KEY (INo) REFERENCES ITEMS(INo)
+);
+
+INSERT INTO CUSTOMERS VALUES
+(1,'Gopal','Pune','9876543210'),
+(2,'Maya','Mumbai','9123456780'),
+(3,'Rahul','Delhi','9988776655'),
+(4,'Sneha','Pune','9090909090');
+
+INSERT INTO ITEMS VALUES
+(101,'Notebook','Stationary',500,50),
+(102,'Pen','Stationary',50,100),
+(103,'Printer','Electronics',7000,10),
+(104,'Bag','Stationary',800,20),
+(105,'Marker','Stationary',450,30);
+
+INSERT INTO PURCHASE VALUES
+(1,'2026-05-10',5,1,101),
+(2,'2026-05-12',2,2,104),
+(3,'2026-05-14',1,3,103),
+(4,'2026-05-15',10,2,102),
+(5,'2026-05-11',3,4,105);
+
+SELECT *
+FROM ITEMS
+WHERE Itype = 'Stationary'
+AND Iprice BETWEEN 400 AND 1000;
+
+UPDATE CUSTOMERS
+SET CMobile = '9999999999'
+WHERE CNo = 1;
+
+SELECT *
+FROM ITEMS
+WHERE Iprice = (SELECT MAX(Iprice) FROM ITEMS);
+
+SELECT *
+FROM PURCHASE
+ORDER BY Pdate DESC;
+
+SELECT Ccity, COUNT(*) AS Total_Customers
+FROM CUSTOMERS
+GROUP BY Ccity;
+
+SELECT P.Pquantity
+FROM PURCHASE P
+JOIN CUSTOMERS C
+ON P.CNo = C.CNo
+WHERE C.Cname = 'Maya';
+
+CREATE VIEW Stationary_View AS
+SELECT Iname, Iprice, Icount
+FROM ITEMS
+WHERE Itype = 'Stationary';
+
+SELECT *
+FROM Stationary_View
+ORDER BY Iprice DESC;

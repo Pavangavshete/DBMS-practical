@@ -1,0 +1,70 @@
+create database pr17;
+use pr17;
+CREATE TABLE O_RollCall(
+    RollNo INT,
+    Name VARCHAR(50)
+);
+
+CREATE TABLE N_RollCall(
+    RollNo INT,
+    Name VARCHAR(50)
+);
+
+INSERT INTO O_RollCall VALUES(1,'Rahul');
+INSERT INTO O_RollCall VALUES(2,'Sneha');
+
+INSERT INTO N_RollCall VALUES(2,'Sneha');
+INSERT INTO N_RollCall VALUES(3,'Amit');
+INSERT INTO N_RollCall VALUES(4,'Priya');
+
+
+DELIMITER //
+
+CREATE PROCEDURE MergeData()
+BEGIN
+
+    DECLARE done INT DEFAULT 0;
+    DECLARE rno INT;
+    DECLARE rname VARCHAR(50);
+    DECLARE cnt INT;
+
+    DECLARE cur CURSOR FOR
+    SELECT RollNo, Name FROM N_RollCall;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND
+    SET done = 1;
+
+    OPEN cur;
+
+    read_loop: LOOP
+
+        FETCH cur INTO rno, rname;
+
+        IF done = 1 THEN
+            LEAVE read_loop;
+        END IF;
+
+        SELECT COUNT(*)
+        INTO cnt
+        FROM O_RollCall
+        WHERE RollNo = rno;
+
+        IF cnt = 0 THEN
+
+            INSERT INTO O_RollCall
+            VALUES(rno, rname);
+
+        END IF;
+
+    END LOOP;
+
+    CLOSE cur;
+
+END //
+
+DELIMITER ;
+
+
+CALL MergeData();
+
+SELECT * FROM O_RollCall;
